@@ -2,33 +2,63 @@ package server
 
 import (
 	"net/http"
-
-	"github.com/KenethSandoval/fruVegesHomeAPI/pkg/router"
-
-	"github.com/gorilla/mux"
+	"regexp"
+	"sync"
 )
 
-type api struct {
-	router http.Handler
+var (
+	listProductRe = regexp.MustCompile(`^\/products[\/]*$`)
+	getUserRe     = regexp.MustCompile(`^\/users\/(\d+)$`)
+	createUserRe  = regexp.MustCompile(`^\/users[\/]*$`)
+)
+
+type product struct {
+	ID      string  `json:"ID"`
+	Name    string  `json:"name,omitempty"`
+	Image   string  `json:"image,omitempty"`
+	Total   int     `json:"total,omitempty"`
+	Price   float32 `json:"price,omitempty"`
+	SoldOut bool    `json:"soldout,omitempty"`
 }
 
-type Server interface {
-	Router() http.Handler
+type datastore struct {
+	m map[string]product
+	*sync.RWMutex
 }
 
-// Init server and router
-func New() Server {
-	a := &api{}
-
-	r := mux.NewRouter()
-
-	r.HandleFunc("/", router.Init).Methods(http.MethodGet)
-
-	a.router = r
-
-	return a
+type Handler struct {
+	store *datastore
 }
 
-func (a *api) Router() http.Handler {
-	return a.router
+// ServeHTTP controll router and server
+func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", "application/json")
+	switch {
+	case r.Method == http.MethodGet && listProductRe.MatchString(r.URL.Path):
+		// h.List(w, r)
+		return
+	case r.Method == http.MethodGet && getUserRe.MatchString(r.URL.Path):
+		return
+	case r.Method == http.MethodPost && createUserRe.MatchString(r.URL.Path):
+		return
+
+	default:
+		NotFound(w)
+		return
+	}
+}
+
+func Init() *http.ServeMux {
+	mux := http.NewServeMux()
+	productH := &Handler{
+		store: &datastore{
+			m: map[string]product{
+				"1": {ID: "1", Name: "Tomates", Image: "tomates.png", Total: 1, Price: 5.00, SoldOut: true},
+			},
+			RWMutex: &sync.RWMutex{},
+		},
+	}
+
+	mux.Handle("/products", productH)
+	return mux
 }
