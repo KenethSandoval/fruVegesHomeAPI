@@ -1,3 +1,5 @@
-module gopherapi
+module github.com/KenethSandoval/fruVegesHomeAPI
 
 go 1.17
+
+require github.com/gorilla/mux v1.8.0 // indirect
