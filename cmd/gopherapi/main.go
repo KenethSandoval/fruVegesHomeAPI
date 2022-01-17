@@ -14,7 +14,7 @@ var (
 )
 
 type product struct {
-	ID      string  `json:"ID"`
+	ID      string  `json:"id"`
 	Name    string  `json:"name,omitempty"`
 	Image   string  `json:"image,omitempty"`
 	Total   int     `json:"total,omitempty"`
