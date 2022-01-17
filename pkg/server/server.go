@@ -1,19 +1,20 @@
 package server
 
 import (
+	"log"
 	"net/http"
+	"os"
 	"regexp"
-	"sync"
 )
 
 var (
-	listProductRe = regexp.MustCompile(`^\/products[\/]*$`)
-	getUserRe     = regexp.MustCompile(`^\/users\/(\d+)$`)
-	createUserRe  = regexp.MustCompile(`^\/users[\/]*$`)
+	listProductRe   = regexp.MustCompile(`^\/products[\/]*$`)
+	getProductRe    = regexp.MustCompile(`^\/product\/(\d+)$`)
+	createProductRe = regexp.MustCompile(`^\/products[\/]*$`)
 )
 
-type product struct {
-	ID      string  `json:"ID"`
+type Product struct {
+	ID      string  `json:"id"`
 	Name    string  `json:"name,omitempty"`
 	Image   string  `json:"image,omitempty"`
 	Total   int     `json:"total,omitempty"`
@@ -21,44 +22,13 @@ type product struct {
 	SoldOut bool    `json:"soldout,omitempty"`
 }
 
-type datastore struct {
-	m map[string]product
-	*sync.RWMutex
-}
-
-type Handler struct {
-	store *datastore
-}
-
-// ServeHTTP controll router and server
-func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
-	switch {
-	case r.Method == http.MethodGet && listProductRe.MatchString(r.URL.Path):
-		// h.List(w, r)
-		return
-	case r.Method == http.MethodGet && getUserRe.MatchString(r.URL.Path):
-		return
-	case r.Method == http.MethodPost && createUserRe.MatchString(r.URL.Path):
-		return
-
-	default:
-		NotFound(w)
-		return
-	}
-}
-
-func Init() *http.ServeMux {
-	mux := http.NewServeMux()
-	productH := &Handler{
-		store: &datastore{
-			m: map[string]product{
-				"1": {ID: "1", Name: "Tomates", Image: "tomates.png", Total: 1, Price: 5.00, SoldOut: true},
-			},
-			RWMutex: &sync.RWMutex{},
-		},
+func InitServer() {
+	PORT := os.Getenv("PORT")
+	if PORT == "" {
+		PORT = "8080"
 	}
 
-	mux.Handle("/products", productH)
-	return mux
+	log.Println("Listening...")
+	//handler := cors.AllowAll().Handler(router)
+	log.Fatal(http.ListenAndServe(":"+PORT, nil))
 }
