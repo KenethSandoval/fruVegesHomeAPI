@@ -105,3 +105,40 @@ func CreateProducts(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(result)
 }
+
+func EditProducts(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	params := mux.Vars(r)
+	productId := params["id"]
+	var product Product
+	defer cancel()
+
+	objId, _ := primitive.ObjectIDFromHex(productId)
+
+	// validate the request body
+	if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		//response
+		return
+	}
+
+	update := bson.M{"name": product.Name, "image": product.Image, "total": product.Total, "price": product.Price, "soldout": product.SoldOut}
+
+	result, err := col.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var updateProduct Product
+	if result.MatchedCount == 1 {
+		err := col.FindOne(ctx, bson.M{"id": objId}).Decode(&updateProduct)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+	w.Header().Set("Content-type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(updateProduct)
+}

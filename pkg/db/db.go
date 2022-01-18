@@ -12,10 +12,15 @@ import (
 var MongoCN = Connect()
 
 func Connect() *mongo.Client {
+	credentials := options.Credential{
+		Username: "root",
+		Password: "root",
+	}
+
 	host := "localhost"
 	port := 27017
 
-	clientOpts := options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%d", host, port))
+	clientOpts := options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%d", host, port)).SetAuth(credentials)
 	client, err := mongo.Connect(context.TODO(), clientOpts)
 	if err != nil {
 		log.Fatal(err)
