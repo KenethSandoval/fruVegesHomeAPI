@@ -3,32 +3,24 @@ package server
 import (
 	"log"
 	"net/http"
-	"os"
-	"regexp"
-)
 
-var (
-	listProductRe   = regexp.MustCompile(`^\/products[\/]*$`)
-	getProductRe    = regexp.MustCompile(`^\/product\/(\d+)$`)
-	createProductRe = regexp.MustCompile(`^\/products[\/]*$`)
+	"github.com/KenethSandoval/fvexpress/internal/router"
+	"github.com/KenethSandoval/fvexpress/pkg/db"
+	"github.com/KenethSandoval/fvexpress/pkg/listening"
 )
-
-type Product struct {
-	ID      string  `json:"id"`
-	Name    string  `json:"name,omitempty"`
-	Image   string  `json:"image,omitempty"`
-	Total   int     `json:"total,omitempty"`
-	Price   float32 `json:"price,omitempty"`
-	SoldOut bool    `json:"soldout,omitempty"`
-}
 
 func InitServer() {
-	PORT := os.Getenv("PORT")
-	if PORT == "" {
-		PORT = "8080"
+	routes := router.InitRouter()
+
+	hs := &http.Server{
+		Addr:    ":8080",
+		Handler: routes,
 	}
 
-	log.Println("Listening...")
-	//handler := cors.AllowAll().Handler(router)
-	log.Fatal(http.ListenAndServe(":"+PORT, nil))
+	listening.ListePrintServer(hs)
+	db.Connect()
+
+	if err := hs.ListenAndServe(); err != nil {
+		log.Fatalf("%v", err)
+	}
 }

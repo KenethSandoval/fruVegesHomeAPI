@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/KenethSandoval/fruVegesHomeAPI/pkg/server"
+	"github.com/KenethSandoval/fvexpress/pkg/server"
 )
 
 func main() {
