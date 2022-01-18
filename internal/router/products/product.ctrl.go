@@ -52,9 +52,11 @@ func GetOneProducts(w http.ResponseWriter, r *http.Request) {
 	var resultado []Product
 
 	params := mux.Vars(r)
+	productId := params["id"]
+	objId, _ := primitive.ObjectIDFromHex(productId)
 
 	condicion := bson.M{
-		"_id": params["id"],
+		"_id": objId,
 	}
 
 	cursor, err := col.Find(ctx, condicion)
@@ -79,6 +81,9 @@ func CreateProducts(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	var products Product
 	defer cancel()
+
+	dbr := db.MongoCN.Database("fvexpress")
+	col := dbr.Collection("products")
 
 	if err := json.NewDecoder(r.Body).Decode(&products); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -124,7 +129,7 @@ func EditProducts(w http.ResponseWriter, r *http.Request) {
 
 	update := bson.M{"name": product.Name, "image": product.Image, "total": product.Total, "price": product.Price, "soldout": product.SoldOut}
 
-	result, err := col.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
+	result, err := col.UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$set": update})
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -132,7 +137,7 @@ func EditProducts(w http.ResponseWriter, r *http.Request) {
 
 	var updateProduct Product
 	if result.MatchedCount == 1 {
-		err := col.FindOne(ctx, bson.M{"id": objId}).Decode(&updateProduct)
+		err := col.FindOne(ctx, bson.M{"_id": objId}).Decode(&updateProduct)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
