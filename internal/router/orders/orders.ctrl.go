@@ -9,6 +9,7 @@ import (
 
 	"github.com/KenethSandoval/fvexpress/pkg/db"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var (
@@ -42,6 +43,26 @@ func GetOrders(w http.ResponseWriter, _ *http.Request) {
 	json.NewEncoder(w).Encode(resultado)
 }
 
-func CreateOrders() {
-	// realizar populate
+func CreateOrders(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	idTest := "61e6c547687e3b27e4814a68"
+
+	objId, _ := primitive.ObjectIDFromHex(idTest)
+
+	newOrder := Orders{
+		Id:     primitive.NewObjectID(),
+		Client: "cliente 1",
+		Order:  []primitive.ObjectID{objId},
+	}
+
+	result, err := col.InsertOne(ctx, newOrder)
+	if err != nil {
+		return
+	}
+	w.Header().Set("Content-type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(result)
+
 }

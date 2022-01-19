@@ -18,6 +18,7 @@ func InitRouter() *mux.Router {
 
 	// Orders
 	router.HandleFunc("/orders", orders.GetOrders).Methods("GET")
+	router.HandleFunc("/orders", orders.CreateOrders).Methods("POST")
 
 	return router
 }
