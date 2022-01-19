@@ -12,6 +12,7 @@ func InitRouter() *mux.Router {
 	router.HandleFunc("/products", products.CreateProducts).Methods("POST")
 	router.HandleFunc("/products/{id}", products.GetOneProducts).Methods("GET")
 	router.HandleFunc("/products/{id}", products.EditProducts).Methods("PUT")
+	router.HandleFunc("/products/{id}", products.DeleteProducts).Methods("DELETE")
 
 	return router
 }

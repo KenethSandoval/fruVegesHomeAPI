@@ -82,9 +82,6 @@ func CreateProducts(w http.ResponseWriter, r *http.Request) {
 	var products Product
 	defer cancel()
 
-	dbr := db.MongoCN.Database("fvexpress")
-	col := dbr.Collection("products")
-
 	if err := json.NewDecoder(r.Body).Decode(&products); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		// crear response
@@ -123,7 +120,7 @@ func EditProducts(w http.ResponseWriter, r *http.Request) {
 	// validate the request body
 	if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		//response
+		// response
 		return
 	}
 
@@ -146,4 +143,27 @@ func EditProducts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(updateProduct)
+}
+
+func DeleteProducts(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	params := mux.Vars(r)
+	productId := params["id"]
+	defer cancel()
+
+	objId, _ := primitive.ObjectIDFromHex(productId)
+
+	result, err := col.DeleteOne(ctx, bson.M{"_id": objId})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if result.DeletedCount < 1 {
+		w.WriteHeader(http.StatusNotFound)
+		// response
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(result)
 }
