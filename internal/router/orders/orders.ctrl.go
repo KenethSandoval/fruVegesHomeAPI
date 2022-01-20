@@ -34,36 +34,21 @@ func GetOrders(w http.ResponseWriter, _ *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	var resultado []Orders
+	lookupStage := bson.D{{"$lookup", bson.D{{"from", "products"}, {"localField", "order"}, {"foreignField", "_id"}, {"as", "order_product"}}}}
 
-	condicion := bson.M{
-		{
-			"$lookup", bson.M{
-				"from", "products",
-				"localField", "order",
-				"foreignField", "_id",
-				"as", "order_product",
-			},
-		},
-	}
-
-	cursor, err := col.Aggregate(ctx, mongo.Pipeline(condicion))
-	// cursor, err := col.Find(ctx, condicion)
+	cursor, err := col.Aggregate(ctx, mongo.Pipeline{lookupStage})
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	for cursor.Next(context.TODO()) {
-		var registro Orders
-		err := cursor.Decode(&registro)
-		if err != nil {
-			log.Fatal(err.Error())
-		}
-		resultado = append(resultado, registro)
+	var showLoaded []bson.M
+	if err = cursor.All(ctx, &showLoaded); err != nil {
+		log.Fatal(err.Error())
 	}
+
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(resultado)
+	json.NewEncoder(w).Encode(showLoaded)
 }
 
 func CreateOrders(w http.ResponseWriter, r *http.Request) {

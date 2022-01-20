@@ -15,7 +15,12 @@ func Connect() *mongo.Client {
 	host := "localhost"
 	port := 27017
 
-	clientOpts := options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%d", host, port))
+	creden := options.Credential{
+		Username: "root",
+		Password: "root",
+	}
+
+	clientOpts := options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%d", host, port)).SetAuth(creden)
 	client, err := mongo.Connect(context.TODO(), clientOpts)
 	if err != nil {
 		log.Fatal(err)
