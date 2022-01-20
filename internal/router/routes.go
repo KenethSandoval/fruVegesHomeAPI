@@ -1,6 +1,7 @@
 package router
 
 import (
+	"github.com/KenethSandoval/fvexpress/internal/auth"
 	"github.com/KenethSandoval/fvexpress/internal/router/orders"
 	"github.com/KenethSandoval/fvexpress/internal/router/products"
 	"github.com/gorilla/mux"
@@ -19,6 +20,9 @@ func InitRouter() *mux.Router {
 	// Orders
 	router.HandleFunc("/orders", orders.GetOrders).Methods("GET")
 	router.HandleFunc("/orders", orders.CreateOrders).Methods("POST")
+
+	//Auth
+	router.HandleFunc("/signin", auth.SignIn).Methods("POST")
 
 	return router
 }

@@ -19,18 +19,6 @@ var (
 )
 
 func GetOrders(w http.ResponseWriter, _ *http.Request) {
-	/*
-		db.orders.aggregate({
-				  $lookup:
-				   {
-				    from: "products",
-				    localField: "order",
-				    foreignField: "_id",
-				    as: "order_product"
-				   }
-				 });
-
-	*/
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
