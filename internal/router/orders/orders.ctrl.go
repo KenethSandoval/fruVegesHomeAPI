@@ -10,6 +10,7 @@ import (
 	"github.com/KenethSandoval/fvexpress/pkg/db"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var (
@@ -18,14 +19,36 @@ var (
 )
 
 func GetOrders(w http.ResponseWriter, _ *http.Request) {
+	/*
+		db.orders.aggregate({
+				  $lookup:
+				   {
+				    from: "products",
+				    localField: "order",
+				    foreignField: "_id",
+				    as: "order_product"
+				   }
+				 });
+
+	*/
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
 	var resultado []Orders
 
-	condicion := bson.M{}
+	condicion := bson.M{
+		{
+			"$lookup", bson.M{
+				"from", "products",
+				"localField", "order",
+				"foreignField", "_id",
+				"as", "order_product",
+			},
+		},
+	}
 
-	cursor, err := col.Find(ctx, condicion)
+	cursor, err := col.Aggregate(ctx, mongo.Pipeline(condicion))
+	// cursor, err := col.Find(ctx, condicion)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
