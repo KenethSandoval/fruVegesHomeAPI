@@ -44,25 +44,29 @@ func GetOrders(w http.ResponseWriter, _ *http.Request) {
 }
 
 func CreateOrders(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	var orders Orders
 	defer cancel()
 
-	idTest := "61e6c547687e3b27e4814a68"
-
-	objId, _ := primitive.ObjectIDFromHex(idTest)
+	if err := json.NewDecoder(r.Body).Decode(&orders); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		// crear response
+		return
+	}
 
 	newOrder := Orders{
 		Id:     primitive.NewObjectID(),
-		Client: "cliente 1",
-		Order:  []primitive.ObjectID{objId},
+		Client: orders.Client,
+		Order:  orders.Order,
 	}
 
 	result, err := col.InsertOne(ctx, newOrder)
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		// crear response
 		return
 	}
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(result)
-
 }

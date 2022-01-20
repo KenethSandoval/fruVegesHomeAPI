@@ -8,5 +8,6 @@ type Product struct {
 	Image   string             `bson:"image" json:"image,omitempty"`
 	Total   int                `bson:"total" json:"total,omitempty"`
 	Price   float32            `bson:"price" json:"price,omitempty"`
+	Amount  int                `bson:"amount" json:"amount,omitempty"`
 	SoldOut bool               `bson:"soldout" json:"soldout,omitempty"`
 }

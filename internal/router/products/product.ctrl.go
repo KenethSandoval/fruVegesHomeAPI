@@ -94,6 +94,7 @@ func CreateProducts(w http.ResponseWriter, r *http.Request) {
 		Image:   products.Image,
 		Total:   products.Total,
 		Price:   products.Price,
+		Amount:  products.Amount,
 		SoldOut: products.SoldOut,
 	}
 
