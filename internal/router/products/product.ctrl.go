@@ -72,7 +72,7 @@ func GetOneProducts(w http.ResponseWriter, r *http.Request) {
 		}
 		resultado = append(resultado, registro)
 	}
-	w.Header().Set("Content-type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(resultado)
 }

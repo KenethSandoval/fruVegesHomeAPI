@@ -3,12 +3,14 @@ package auth
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/KenethSandoval/fvexpress/internal/users"
 	"github.com/KenethSandoval/fvexpress/pkg/db"
-	"github.com/golang-jwt/jwt"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -57,6 +59,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	var creds Credentials
+	var result []Credentials
 
 	err := json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
@@ -64,7 +67,32 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	expectedPassword, ok := usersFake[creds.Username]
+	where := bson.M{
+		"username": creds.Username,
+	}
+
+	cursor, err := col.Find(ctx, where)
+	if err != nil {
+		return
+	}
+
+	for cursor.Next(context.TODO()) {
+		var registro Credentials
+		err := cursor.Decode(&registro)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		result = append(result, registro)
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(result[len(result)-1].Password), []byte(creds.Password))
+	fmt.Println(err)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(result)
+
+	/*expectedPassword, ok := usersFake[creds.Username]
 
 	if !ok || expectedPassword != creds.Password {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -91,9 +119,8 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 
 	resp := make(map[string]string)
 	resp["token"] = tokenString
-	resp["user"] = creds.Username
 
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(resp)
+	json.NewEncoder(w).Encode(resp)*/
 }
