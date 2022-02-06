@@ -4,7 +4,7 @@ import "github.com/golang-jwt/jwt"
 
 var jwtKey = []byte("my_secret")
 
-var users = map[string]string{
+var usersFake = map[string]string{
 	"user1": "password1",
 	"user2": "password2",
 }
@@ -21,5 +21,3 @@ type Claims struct {
 	Username string `json:"username"`
 	jwt.StandardClaims
 }
-
-//

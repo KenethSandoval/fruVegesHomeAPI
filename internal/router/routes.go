@@ -21,8 +21,9 @@ func InitRouter() *mux.Router {
 	router.HandleFunc("/orders", orders.GetOrders).Methods("GET")
 	router.HandleFunc("/orders", orders.CreateOrders).Methods("POST")
 
-	//Auth
+	// Auth
 	router.HandleFunc("/signin", auth.SignIn).Methods("POST")
+	router.HandleFunc("/signup", auth.SignUp).Methods("POST")
 
 	return router
 }
