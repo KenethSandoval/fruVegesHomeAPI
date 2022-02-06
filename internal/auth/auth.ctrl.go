@@ -3,13 +3,13 @@ package auth
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/KenethSandoval/fvexpress/internal/users"
 	"github.com/KenethSandoval/fvexpress/pkg/db"
+	"github.com/golang-jwt/jwt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
@@ -86,15 +86,8 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(result[len(result)-1].Password), []byte(creds.Password))
-	fmt.Println(err)
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(result)
-
-	/*expectedPassword, ok := usersFake[creds.Username]
-
-	if !ok || expectedPassword != creds.Password {
+	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -122,5 +115,5 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(resp)*/
+	json.NewEncoder(w).Encode(resp)
 }
