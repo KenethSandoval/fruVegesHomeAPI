@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/KenethSandoval/fvexpress/pkg/db"
 	"github.com/golang-jwt/jwt"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
@@ -29,14 +29,16 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return
+	}
+
 	newUser := users.Users{
 		Id:       primitive.NewObjectID(),
 		Username: user.Username,
-
-		// TODO: encrypt password
-		Password: user.Password,
+		Password: string(hashedPassword),
 	}
-	fmt.Printf("%v", newUser)
 
 	result, err := col.InsertOne(ctx, newUser)
 	if err != nil {
@@ -51,6 +53,9 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 
 // SignIn the handler
 func SignIn(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
 	var creds Credentials
 
 	err := json.NewDecoder(r.Body).Decode(&creds)
@@ -66,6 +71,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// REFACTOR (ks): Generar token
 	expirationTime := time.Now().Add(5 * time.Minute)
 
 	claims := &Claims{
@@ -83,7 +89,11 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	resp := make(map[string]string)
+	resp["token"] = tokenString
+	resp["user"] = creds.Username
+
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(tokenString)
+	json.NewEncoder(w).Encode(resp)
 }
