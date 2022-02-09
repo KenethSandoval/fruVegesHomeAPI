@@ -51,9 +51,10 @@ func CreateOrders(w http.ResponseWriter, r *http.Request) {
 	}
 
 	newOrder := Orders{
-		Id:     primitive.NewObjectID(),
-		Client: orders.Client,
-		Order:  orders.Order,
+		Id:      primitive.NewObjectID(),
+		Client:  orders.Client,
+		Address: orders.Address,
+		Order:   orders.Order,
 	}
 
 	result, err := col.InsertOne(ctx, newOrder)

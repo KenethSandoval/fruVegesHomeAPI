@@ -37,9 +37,11 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	newUser := users.Users{
-		Id:       primitive.NewObjectID(),
-		Username: user.Username,
-		Password: string(hashedPassword),
+		Id:         primitive.NewObjectID(),
+		Phone:      user.Phone,
+		PhoneExtra: user.PhoneExtra,
+		Username:   user.Username,
+		Password:   string(hashedPassword),
 	}
 
 	result, err := col.InsertOne(ctx, newUser)
