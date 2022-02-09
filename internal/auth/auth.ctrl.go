@@ -60,8 +60,8 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	var creds Credentials
-	var result []Credentials
+	var creds users.Users
+	var result []users.Users
 
 	err := json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
@@ -79,7 +79,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for cursor.Next(context.TODO()) {
-		var registro Credentials
+		var registro users.Users
 		err := cursor.Decode(&registro)
 		if err != nil {
 			log.Fatal(err.Error())
@@ -99,6 +99,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 
 	claims := &Claims{
 		Username: creds.Username,
+		Id:       result[len(result)-1].Id,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
