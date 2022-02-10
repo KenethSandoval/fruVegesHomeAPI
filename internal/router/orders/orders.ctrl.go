@@ -22,9 +22,31 @@ func GetOrders(w http.ResponseWriter, _ *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	lookupStage := bson.D{{"$lookup", bson.D{{"from", "products"}, {"localField", "order"}, {"foreignField", "_id"}, {"as", "order_product"}}}}
+	lookupStage := bson.D{
+		{
+			"$lookup",
+			bson.D{
+				{"from", "products"},
+				{"localField", "order"},
+				{"foreignField", "_id"},
+				{"as", "order_product"},
+			},
+		},
+	}
 
-	cursor, err := col.Aggregate(ctx, mongo.Pipeline{lookupStage})
+	lookupStage2 := bson.D{
+		{
+			"$lookup",
+			bson.D{
+				{"from", "users"},
+				{"localField", "client"},
+				{"foreignField", "_id"},
+				{"as", "order_client"},
+			},
+		},
+	}
+
+	cursor, err := col.Aggregate(ctx, mongo.Pipeline{lookupStage, lookupStage2})
 	if err != nil {
 		log.Fatal(err.Error())
 	}

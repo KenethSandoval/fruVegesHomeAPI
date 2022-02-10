@@ -6,7 +6,7 @@ import (
 
 type Orders struct {
 	Id      primitive.ObjectID `bson:"_id" json:"_id,omitempty"`
-	Client  string             `bson:"client" json:"client,omitempty"`
 	Address string
+	Client  primitive.ObjectID   `bson:"client" json:"client,omitempty"`
 	Order   []primitive.ObjectID `bson:"order" json:"order,omitempty"`
 }
