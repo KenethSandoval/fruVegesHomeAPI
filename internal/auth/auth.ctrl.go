@@ -9,7 +9,6 @@ import (
 
 	"github.com/KenethSandoval/fvexpress/internal/users"
 	"github.com/KenethSandoval/fvexpress/pkg/db"
-	"github.com/golang-jwt/jwt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
@@ -94,24 +93,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// REFACTOR (ks): Generar token
-	expirationTime := time.Now().Add(5 * time.Minute)
-
-	claims := &Claims{
-		Username: creds.Username,
-		Id:       result[len(result)-1].Id,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expirationTime.Unix(),
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	tokenString, err := token.SignedString(jwtKey)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	tokenString, _ := GenerateToken(creds, result)
 
 	resp := make(map[string]string)
 	resp["token"] = tokenString
