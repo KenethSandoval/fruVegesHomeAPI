@@ -1,2 +1,2 @@
 run:
-	go run cmd/gopherapi/main.go
+	go run cmd/main.go
