@@ -16,6 +16,7 @@ type authenticationMiddleware struct {
 
 // Initialize it somewhere
 func (amw *authenticationMiddleware) Populate() {
+	amw.tokenUsers = make(map[string]string)
 	amw.tokenUsers["00000000"] = "user0"
 	amw.tokenUsers["aaaaaaaa"] = "userA"
 	amw.tokenUsers["05f717e5"] = "randomUser"
@@ -39,7 +40,7 @@ func (amw *authenticationMiddleware) Middleware(next http.Handler) http.Handler 
 	})
 }
 
-func InitRouter() *mux.Router {
+func PrivateRouter() *mux.Router {
 	amw := authenticationMiddleware{}
 	amw.Populate()
 	router := mux.NewRouter()
@@ -57,6 +58,12 @@ func InitRouter() *mux.Router {
 	router.HandleFunc("/orders", orders.GetOrders).Methods("GET")
 	router.HandleFunc("/orders", orders.CreateOrders).Methods("POST")
 
+	return router
+}
+
+func publicRouter() *mux.Router {
+	router := mux.NewRouter()
+	router = router.PathPrefix("/api").Subrouter()
 	// Auth
 	router.HandleFunc("/auth/signin", auth.SignIn).Methods("POST")
 	router.HandleFunc("/signup", auth.SignUp).Methods("POST")
