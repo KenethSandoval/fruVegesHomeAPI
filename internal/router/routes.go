@@ -9,6 +9,7 @@ import (
 
 func InitRouter() *mux.Router {
 	router := mux.NewRouter()
+	router = router.PathPrefix("/api").Subrouter()
 
 	// Products
 	router.HandleFunc("/products", products.GetProducts).Methods("GET")
