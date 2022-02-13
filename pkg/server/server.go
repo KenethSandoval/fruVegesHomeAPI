@@ -10,7 +10,7 @@ import (
 )
 
 func InitServer() {
-	routes := router.PrivateRouter()
+	routes := router.InitRouter()
 
 	hs := &http.Server{
 		Addr:    ":8080",

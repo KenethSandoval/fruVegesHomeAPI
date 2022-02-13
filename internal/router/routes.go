@@ -40,33 +40,27 @@ func (amw *authenticationMiddleware) Middleware(next http.Handler) http.Handler 
 	})
 }
 
-func PrivateRouter() *mux.Router {
+func InitRouter() *mux.Router {
 	amw := authenticationMiddleware{}
 	amw.Populate()
 	router := mux.NewRouter()
 	router = router.PathPrefix("/api").Subrouter()
-	router.Use(amw.Middleware)
+	privateR := router.NewRoute().Subrouter()
+	privateR.Use(amw.Middleware)
 
 	// Products
-	router.HandleFunc("/products", products.GetProducts).Methods("GET")
-	router.HandleFunc("/products", products.CreateProducts).Methods("POST")
-	router.HandleFunc("/products/{id}", products.GetOneProducts).Methods("GET")
-	router.HandleFunc("/products/{id}", products.EditProducts).Methods("PUT")
-	router.HandleFunc("/products/{id}", products.DeleteProducts).Methods("DELETE")
+	privateR.HandleFunc("/products", products.GetProducts).Methods("GET")
+	privateR.HandleFunc("/products", products.CreateProducts).Methods("POST")
+	privateR.HandleFunc("/products/{id}", products.GetOneProducts).Methods("GET")
+	privateR.HandleFunc("/products/{id}", products.EditProducts).Methods("PUT")
+	privateR.HandleFunc("/products/{id}", products.DeleteProducts).Methods("DELETE")
 
 	// Orders
-	router.HandleFunc("/orders", orders.GetOrders).Methods("GET")
-	router.HandleFunc("/orders", orders.CreateOrders).Methods("POST")
+	privateR.HandleFunc("/orders", orders.GetOrders).Methods("GET")
+	privateR.HandleFunc("/orders", orders.CreateOrders).Methods("POST")
 
-	return router
-}
-
-func publicRouter() *mux.Router {
-	router := mux.NewRouter()
-	router = router.PathPrefix("/api").Subrouter()
 	// Auth
-	router.HandleFunc("/auth/signin", auth.SignIn).Methods("POST")
+	router.HandleFunc("/signin", auth.SignIn).Methods("POST")
 	router.HandleFunc("/signup", auth.SignUp).Methods("POST")
-
 	return router
 }
