@@ -93,7 +93,13 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenString, _ := GenerateToken(creds, result)
+	jwtW := JwtWrapper{
+		SecretKey:       "ponerenv",
+		Issuer:          "AuthService",
+		ExpirationHours: 24,
+	}
+
+	tokenString, _ := jwtW.GenerateToken(creds.Username)
 
 	resp := make(map[string]string)
 	resp["token"] = tokenString
