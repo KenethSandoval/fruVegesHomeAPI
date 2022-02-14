@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var jwtKey = []byte("my_secret")
@@ -18,14 +19,15 @@ type JwtWrapper struct {
 // Claims struct that will be encoded to a JWT.
 // We add jwt.StandardClaims as an embedded type, to provide fields like expiry time
 type Claims struct {
-	// Id       primitive.ObjectID `json:"_id"`
-	Username string `json:"username"`
+	Id       primitive.ObjectID `json:"_id"`
+	Username string             `json:"username"`
 	jwt.StandardClaims
 }
 
-func (j *JwtWrapper) GenerateToken(username string) (signedToken string, err error) {
+func (j *JwtWrapper) GenerateToken(username string, id primitive.ObjectID) (signedToken string, err error) {
 	claims := &Claims{
 		Username: username,
+		Id:       id,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(j.ExpirationHours)).Unix(),
 			Issuer:    j.Issuer,

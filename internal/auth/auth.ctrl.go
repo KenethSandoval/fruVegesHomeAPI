@@ -99,7 +99,7 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		ExpirationHours: 24,
 	}
 
-	tokenString, _ := jwtW.GenerateToken(creds.Username)
+	tokenString, _ := jwtW.GenerateToken(creds.Username, result[len(result)-1].Id)
 
 	resp := make(map[string]string)
 	resp["token"] = tokenString
